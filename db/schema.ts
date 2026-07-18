@@ -50,3 +50,61 @@ export const assignments = sqliteTable("assignments", {
   createdBy: text("created_by").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const lessonAttempts = sqliteTable("lesson_attempts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull(),
+  day: integer("day").notNull(),
+  score: integer("score").notNull(),
+  minutes: integer("minutes").notNull(),
+  note: text("note").notNull().default(""),
+  answersJson: text("answers_json").notNull().default("{}"),
+  completedAt: text("completed_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const submissions = sqliteTable("submissions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  assignmentId: integer("assignment_id").notNull(),
+  studentEmail: text("student_email").notNull(),
+  content: text("content").notNull().default(""),
+  score: integer("score"),
+  feedback: text("feedback").notNull().default(""),
+  status: text("status", { enum: ["submitted", "reviewed", "returned"] }).notNull().default("submitted"),
+  submittedAt: text("submitted_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  reviewedAt: text("reviewed_at"),
+});
+
+export const familyInvites = sqliteTable("family_invites", {
+  code: text("code").primaryKey(),
+  studentEmail: text("student_email").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  redeemedBy: text("redeemed_by"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const guardianLinks = sqliteTable(
+  "guardian_links",
+  {
+    guardianEmail: text("guardian_email").notNull(),
+    studentEmail: text("student_email").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [primaryKey({ columns: [table.guardianEmail, table.studentEmail] })],
+);
+
+export const notifications = sqliteTable("notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  read: integer("read", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const lessonOverrides = sqliteTable("lesson_overrides", {
+  day: integer("day").primaryKey(),
+  title: text("title").notNull(),
+  payloadJson: text("payload_json").notNull().default("{}"),
+  updatedBy: text("updated_by").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

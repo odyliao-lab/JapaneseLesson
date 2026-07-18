@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { assignments, classes } from "../../../db/schema";
+import { assignments, classes, classMembers, notifications } from "../../../db/schema";
 import { getChatGPTUser } from "../../chatgpt-auth";
 
 export async function GET() {
@@ -55,6 +55,19 @@ export async function POST(request: Request) {
       .insert(assignments)
       .values({ classId, title, startDay, endDay, dueDate, createdBy: user.email })
       .returning();
+    const members = await db
+      .select({ email: classMembers.studentEmail })
+      .from(classMembers)
+      .where(eq(classMembers.classId, classId));
+    if (members.length) {
+      await db.insert(notifications).values(
+        members.map((member) => ({
+          email: member.email,
+          title: "收到新的班級作業",
+          body: `${title}・DAY ${startDay}–${endDay}・截止 ${dueDate}`,
+        })),
+      );
+    }
     return Response.json({ assignment: created }, { status: 201 });
   } catch {
     return Response.json({ error: "建立作業失敗，請稍後再試" }, { status: 503 });

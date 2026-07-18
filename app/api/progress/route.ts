@@ -1,6 +1,6 @@
 import { and, asc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { profiles, progress } from "../../../db/schema";
+import { lessonAttempts, profiles, progress } from "../../../db/schema";
 import { getChatGPTUser } from "../../chatgpt-auth";
 
 export async function GET() {
@@ -15,9 +15,21 @@ export async function GET() {
       .where(eq(progress.email, user.email))
       .orderBy(asc(progress.day));
 
+    const attempts = await db
+      .select({
+        day: lessonAttempts.day,
+        score: lessonAttempts.score,
+        minutes: lessonAttempts.minutes,
+        note: lessonAttempts.note,
+        completedAt: lessonAttempts.completedAt,
+      })
+      .from(lessonAttempts)
+      .where(eq(lessonAttempts.email, user.email))
+      .orderBy(asc(lessonAttempts.day));
+
     return Response.json({
       completedDays: rows.map((row) => row.day),
-      records: rows,
+      records: attempts,
     });
   } catch {
     return Response.json({ error: "進度資料暫時無法讀取" }, { status: 503 });
@@ -28,7 +40,14 @@ export async function POST(request: Request) {
   const user = await getChatGPTUser();
   if (!user) return Response.json({ error: "請先登入" }, { status: 401 });
 
-  const payload = (await request.json()) as { day?: number; score?: number; minutes?: number };
+  const payload = (await request.json()) as {
+    day?: number;
+    score?: number;
+    minutes?: number;
+    note?: string;
+    answers?: Record<string, number>;
+    completedAt?: string;
+  };
   const day = Math.trunc(Number(payload.day));
   const score = Math.max(0, Math.min(100, Math.trunc(Number(payload.score ?? 0))));
   const minutes = Math.max(0, Math.min(180, Math.trunc(Number(payload.minutes ?? 0))));
@@ -61,6 +80,19 @@ export async function POST(request: Request) {
     } else {
       await db.insert(progress).values({ email: user.email, day, score, minutes });
     }
+
+    await db.delete(lessonAttempts).where(
+      and(eq(lessonAttempts.email, user.email), eq(lessonAttempts.day, day)),
+    );
+    await db.insert(lessonAttempts).values({
+      email: user.email,
+      day,
+      score,
+      minutes,
+      note: payload.note?.trim().slice(0, 4000) ?? "",
+      answersJson: JSON.stringify(payload.answers ?? {}),
+      completedAt: payload.completedAt ?? new Date().toISOString(),
+    });
 
     return Response.json({ ok: true, day });
   } catch {

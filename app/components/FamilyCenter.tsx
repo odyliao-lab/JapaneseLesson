@@ -1,0 +1,83 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import type { ChatGPTUser } from "../chatgpt-auth";
+
+type Props = { user: ChatGPTUser | null };
+type Child = { email: string; records: Array<{ day: number; score: number; minutes: number; completedAt: string }> };
+
+export default function FamilyCenter({ user }: Props) {
+  const [code, setCode] = useState("");
+  const [children, setChildren] = useState<Child[]>([]);
+  const [message, setMessage] = useState(user ? "學生可建立連結碼；家長使用自己的帳號兌換。" : "請先登入。");
+
+  async function load() {
+    if (!user) return;
+    const response = await fetch("/api/family");
+    if (response.ok) setChildren((await response.json()).children ?? []);
+  }
+
+  useEffect(() => { void load(); }, [user]);
+
+  async function createInvite() {
+    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/family");
+    const response = await fetch("/api/family", {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "create" }),
+    });
+    const result = await response.json();
+    if (response.ok) {
+      setCode(result.code);
+      setMessage("連結碼 24 小時內有效，請交給家長。");
+    } else setMessage(result.error);
+  }
+
+  async function redeem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/family");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const response = await fetch("/api/family", {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "redeem", code: data.get("code") }),
+    });
+    const result = await response.json();
+    setMessage(response.ok ? "已完成家長連結。" : result.error);
+    if (response.ok) { form.reset(); await load(); }
+  }
+
+  return (
+    <div className="site-shell">
+      <header className="topbar">
+        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>FAMILY REPORT</small></span></a>
+        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/join">加入班級</a><a className="active" href="/family">家長連結</a></nav>
+        <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/family">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/family">登入</a>}</div>
+      </header>
+      <main className="teacher-wrap">
+        <section className="panel teacher-hero">
+          <div><span className="eyebrow">FAMILY CONNECTION</span><h1>家長連結中心</h1><p className="lead">使用限時連結碼保護學生資料，家長只能查看已由學生主動授權的學習報告。</p><div className="status-note" aria-live="polite">{message}</div></div>
+          <div className="stat-grid">
+            <button className="stat-card action-stat" onClick={createInvite}><b>{code || "產生"}</b><span>學生建立家長連結碼</span></button>
+            <form className="stat-card form-stack" onSubmit={redeem}><input name="code" placeholder="輸入連結碼" maxLength={6} required /><button className="primary-button" type="submit">家長兌換</button></form>
+          </div>
+        </section>
+        <section className="panel dashboard-card page-card">
+          <div className="section-heading"><div><small className="muted">CHILD REPORTS</small><h2>已連結學生報告</h2></div><button className="secondary-button" onClick={() => window.print()}>列印／存成 PDF</button></div>
+          {children.length ? children.map((child) => {
+            const average = child.records.length ? Math.round(child.records.reduce((sum, item) => sum + item.score, 0) / child.records.length) : 0;
+            const minutes = child.records.reduce((sum, item) => sum + item.minutes, 0);
+            return (
+              <article className="family-report" key={child.email}>
+                <h3>{child.email}</h3>
+                <div className="report-stat-grid">
+                  <div className="stat-card"><b>{child.records.length}</b><span>完成天數</span></div>
+                  <div className="stat-card"><b>{average}%</b><span>平均分數</span></div>
+                  <div className="stat-card"><b>{minutes}</b><span>學習分鐘</span></div>
+                  <div className="stat-card"><b>{child.records.length >= 45 ? "N4" : "N5"}</b><span>目前階段</span></div>
+                </div>
+              </article>
+            );
+          }) : <p className="muted">目前沒有已連結的學生帳號。</p>}
+        </section>
+      </main>
+    </div>
+  );
+}
