@@ -7,7 +7,7 @@ type Props = { user: ChatGPTUser | null };
 type ClassItem = { id: number; name: string; inviteCode: string };
 type Assignment = { id: number; classId: number; title: string; startDay: number; endDay: number; dueDate: string };
 type Submission = { id: number; assignmentId: number; studentEmail: string; content: string; score: number | null; feedback: string; status: string };
-type StudentReport = { email: string; name: string; completedDays: number; average: number; minutes: number; lastActive: string | null; support: string };
+type StudentReport = { email: string; name: string; completedDays: number; average: number; minutes: number; lastActive: string | null; writingChecked: number; writingReview: string[]; support: string };
 
 export default function TeacherDashboard({ user }: Props) {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -124,8 +124,8 @@ export default function TeacherDashboard({ user }: Props) {
 
   function exportClassCsv() {
     const rows = [
-      ["姓名", "Email", "完成天數", "平均分數", "學習分鐘", "最後活動", "建議"],
-      ...students.map((student) => [student.name, student.email, student.completedDays, student.average, student.minutes, student.lastActive ?? "", student.support]),
+      ["姓名", "Email", "完成天數", "平均分數", "學習分鐘", "已檢查假名", "待複習假名", "最後活動", "建議"],
+      ...students.map((student) => [student.name, student.email, student.completedDays, student.average, student.minutes, student.writingChecked, student.writingReview.join("、"), student.lastActive ?? "", student.support]),
     ];
     const csv = rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
@@ -201,7 +201,12 @@ export default function TeacherDashboard({ user }: Props) {
                 <span><strong>{student.name}</strong><small>{student.email}</small></span>
                 <span>DAY {student.completedDays}</span>
                 <div className="mini-track"><div className="progress-fill" style={{ width: `${student.completedDays / 60 * 100}%` }} /></div>
-                <span className={student.average < 70 ? "needs-support" : "doing-well"}>{student.average}%・{student.support}</span>
+                <span className={student.average < 70 ? "needs-support" : "doing-well"}>
+                  {student.average}%・{student.support}
+                  <small>{student.writingChecked
+                    ? `書寫已檢查 ${student.writingChecked} 字${student.writingReview.length ? `・待複習 ${student.writingReview.join("、")}` : ""}`
+                    : "尚無紙筆書寫自評"}</small>
+                </span>
                 <span className="member-actions">
                   {classes.length > 1 && (
                     <select aria-label={`轉移 ${student.name}`} defaultValue="" onChange={(event) => {

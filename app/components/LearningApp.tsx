@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
 import { lessons, stages, type Lesson, type StageId } from "../data/curriculum";
 import { badgeCatalog, buildLessonContent, lessonLevel } from "../data/lesson-content";
+import KanaWritingLab from "./KanaWritingLab";
 
 type Props = {
   user: ChatGPTUser | null;
@@ -35,7 +36,8 @@ const storageKey = "jpll-progress-v2";
 const legacyStorageKey = "jpll-progress-v1";
 const attemptKey = "jpll-attempts-v2";
 const romajiKey = "jpll-romaji-v1";
-const steps = ["案件簡報", "線索詞彙", "文法鑑識", "聽力證詞", "獨立搜查", "結案測驗", "案件報告"];
+const standardSteps = ["案件簡報", "線索詞彙", "文法鑑識", "聽力證詞", "獨立搜查", "結案測驗", "案件報告"];
+const kanaSteps = ["案件簡報", "字形鑑識", "線索詞彙", "文法鑑識", "聽力證詞", "獨立搜查", "結案測驗", "案件報告"];
 
 export default function LearningApp({ user, overrides }: Props) {
   const [completed, setCompleted] = useState<number[]>([]);
@@ -118,6 +120,10 @@ export default function LearningApp({ user, overrides }: Props) {
   const content = activeLesson
     ? mergeOverride(buildLessonContent(activeLesson), overrides.find((item) => item.day === activeLesson.day)?.payloadJson)
     : null;
+  const isKanaLesson = Boolean(activeLesson && activeLesson.day <= 12);
+  const lessonSteps = isKanaLesson ? kanaSteps : standardSteps;
+  const isKanaStep = isKanaLesson && activeStep === 1;
+  const contentStep = activeStep - (isKanaLesson && activeStep > 1 ? 1 : 0);
 
   function validDay(day: number) {
     return Number.isInteger(day) && day >= 1 && day <= 60;
@@ -178,7 +184,7 @@ export default function LearningApp({ user, overrides }: Props) {
     if (!activeLesson || !content) return;
     if (Object.keys(answers).length < content.quizzes.length) {
       setLessonMessage("請先完成全部五題結案測驗。");
-      setActiveStep(5);
+      setActiveStep(isKanaLesson ? 6 : 5);
       return;
     }
     if (studyNote.trim().length < 20) {
@@ -425,7 +431,7 @@ export default function LearningApp({ user, overrides }: Props) {
             </div>
 
             <div className="step-tabs" role="tablist" aria-label="課堂進度">
-              {steps.map((step, index) => (
+              {lessonSteps.map((step, index) => (
                 <button className={activeStep === index ? "current" : ""} onClick={() => setActiveStep(index)} role="tab" aria-selected={activeStep === index} key={step}>
                   <span>{index + 1}</span>{step}
                 </button>
@@ -439,11 +445,15 @@ export default function LearningApp({ user, overrides }: Props) {
                     <div><b lang="ja">{activeLesson.clue}</b>{romaji && <span className="romaji">{activeLesson.romaji}</span>}<p className="muted">{activeLesson.meaning}</p></div>
                     <button className="voice-button" onClick={() => speak(activeLesson.clue)} aria-label="播放日語發音">♪</button>
                   </div>
-                  <div className="status-note"><b>案件目標</b><br />{activeLesson.mission}<br /><br /><b>預計時間</b><br />簡報 5・詞彙 12・文法 10・聽力 10・自習 15・結案 5 分鐘</div>
+                  <div className="status-note"><b>案件目標</b><br />{activeLesson.mission}<br /><br /><b>預計時間</b><br />{isKanaLesson ? "簡報 5・筆順與紙筆 12・發音詞彙 8・聽辨 8・自習默寫 10・測驗結案 12 分鐘" : "簡報 5・詞彙 12・文法 10・聽力 10・自習 15・結案 5 分鐘"}</div>
                 </div>
               )}
 
-              {activeStep === 1 && (
+              {isKanaStep && (
+                <KanaWritingLab day={activeLesson.day} signedIn={Boolean(user)} speak={speak} />
+              )}
+
+              {!isKanaStep && contentStep === 1 && (
                 <>
                   <div className="step-heading"><div><small>VOCABULARY FILE</small><h3>今日 10 個核心詞彙</h3></div><button className="secondary-button" onClick={() => speak(content.vocabulary.map((item) => item[0]).join("。"), 0.72)}>連續播放</button></div>
                   <div className="vocab-grid">
@@ -456,7 +466,7 @@ export default function LearningApp({ user, overrides }: Props) {
                 </>
               )}
 
-              {activeStep === 2 && (
+              {!isKanaStep && contentStep === 2 && (
                 <div className="grammar-file">
                   <small>GRAMMAR ANALYSIS</small><h3>{content.grammar.title}</h3><p>{content.grammar.explanation}</p>
                   <div className="example-list">
@@ -468,7 +478,7 @@ export default function LearningApp({ user, overrides }: Props) {
                 </div>
               )}
 
-              {activeStep === 3 && (
+              {!isKanaStep && contentStep === 3 && (
                 <div className="listening-lab">
                   <small>LISTENING TESTIMONY</small><h3>先不看文字，連續聽兩次</h3>
                   <div className="listening-controls">
@@ -487,9 +497,10 @@ export default function LearningApp({ user, overrides }: Props) {
                 </div>
               )}
 
-              {activeStep === 4 && (
+              {!isKanaStep && contentStep === 4 && (
                 <div className="study-file">
-                  <small>INDEPENDENT INVESTIGATION</small><h3>15 分鐘獨立搜查</h3>
+                  <small>INDEPENDENT INVESTIGATION</small><h3>{isKanaLesson ? "10 分鐘紙筆默寫與自我檢查" : "15 分鐘獨立搜查"}</h3>
+                  {isKanaLesson && <div className="status-note">紙筆任務：關閉答案提示後，由語音隨機聽寫；每字默寫 2 次，再把「還不熟／需要重練」的字各補寫 3 次。</div>}
                   <ol>{content.selfStudy.map((item) => <li key={item}>{item}</li>)}</ol>
                   <label>案件筆記（至少 20 字）
                     <textarea value={studyNote} onChange={(event) => setStudyNote(event.target.value)} rows={5} placeholder="記下不熟悉的線索、自己的例句，以及今天最容易出錯的地方……" />
@@ -500,7 +511,7 @@ export default function LearningApp({ user, overrides }: Props) {
                 </div>
               )}
 
-              {activeStep === 5 && (
+              {!isKanaStep && contentStep === 5 && (
                 <div className="quiz-list">
                   <small>CLOSING EXAM</small><h3>五題全部完成後才可結案</h3>
                   {content.quizzes.map((quiz, quizIndex) => (
@@ -521,7 +532,7 @@ export default function LearningApp({ user, overrides }: Props) {
                 </div>
               )}
 
-              {activeStep === 6 && (
+              {!isKanaStep && contentStep === 6 && (
                 <div className="closing-report">
                   <small>FINAL REPORT</small><h3>案件結案確認</h3>
                   <div className="report-stat-grid">
@@ -539,8 +550,8 @@ export default function LearningApp({ user, overrides }: Props) {
             {lessonMessage && <p className="lesson-message" aria-live="polite">{lessonMessage}</p>}
             <div className="dialog-actions">
               <button className="secondary-button" disabled={activeStep === 0} onClick={() => setActiveStep((step) => Math.max(0, step - 1))}>← 上一步</button>
-              {activeStep < steps.length - 1 ? (
-                <button className="primary-button" onClick={() => setActiveStep((step) => Math.min(steps.length - 1, step + 1))}>下一步 →</button>
+              {activeStep < lessonSteps.length - 1 ? (
+                <button className="primary-button" onClick={() => setActiveStep((step) => Math.min(lessonSteps.length - 1, step + 1))}>下一步 →</button>
               ) : (
                 <button className="secondary-button" onClick={() => setActiveLesson(null)}>返回案件地圖</button>
               )}

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const profiles = sqliteTable("profiles", {
   email: text("email").primaryKey(),
@@ -108,3 +108,19 @@ export const lessonOverrides = sqliteTable("lesson_overrides", {
   updatedBy: text("updated_by").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const kanaMastery = sqliteTable(
+  "kana_mastery",
+  {
+    email: text("email").notNull(),
+    kana: text("kana").notNull(),
+    day: integer("day").notNull(),
+    rating: text("rating", { enum: ["smooth", "review", "retry"] }).notNull().default("review"),
+    attempts: integer("attempts").notNull().default(1),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    primaryKey({ columns: [table.email, table.kana] }),
+    index("kana_mastery_email_day_idx").on(table.email, table.day),
+  ],
+);

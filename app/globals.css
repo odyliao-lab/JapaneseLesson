@@ -1534,6 +1534,395 @@ p {
   white-space: pre-wrap;
 }
 
+.kana-lab {
+  display: grid;
+  gap: 18px;
+}
+
+.kana-lab-actions,
+.stroke-controls,
+.rating-row,
+.worksheet-toolbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.kana-selector {
+  display: flex;
+  gap: 7px;
+  padding-bottom: 5px;
+  overflow-x: auto;
+}
+
+.kana-selector button {
+  min-width: 65px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px;
+  color: white;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.kana-selector span,
+.kana-selector small {
+  display: block;
+}
+
+.kana-selector span {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.kana-selector small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.kana-selector button.selected {
+  border-color: var(--cyan);
+  background: rgba(50, 211, 244, 0.12);
+}
+
+.kana-selector button.smooth {
+  box-shadow: inset 0 -3px var(--mint);
+}
+
+.kana-selector button.review,
+.kana-selector button.retry {
+  box-shadow: inset 0 -3px var(--yellow);
+}
+
+.kana-selector button.retry {
+  box-shadow: inset 0 -3px var(--coral);
+}
+
+.kana-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(280px, 1.1fr);
+  gap: 16px;
+}
+
+.stroke-stage {
+  position: relative;
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(50, 211, 244, 0.24);
+  border-radius: 20px;
+  background: #f8f3e8;
+}
+
+.practice-grid,
+.practice-grid::before,
+.practice-grid::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.practice-grid {
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(32, 92, 105, 0.17) 50%, transparent calc(50% + 1px)),
+    linear-gradient(transparent calc(50% - 1px), rgba(32, 92, 105, 0.17) 50%, transparent calc(50% + 1px));
+}
+
+.practice-grid::before {
+  background: linear-gradient(45deg, transparent calc(50% - 0.5px), rgba(32, 92, 105, 0.08) 50%, transparent calc(50% + 0.5px));
+}
+
+.practice-grid::after {
+  background: linear-gradient(-45deg, transparent calc(50% - 0.5px), rgba(32, 92, 105, 0.08) 50%, transparent calc(50% + 0.5px));
+}
+
+.stroke-stage svg {
+  position: relative;
+  width: min(310px, 86%);
+  height: min(310px, 86%);
+}
+
+.stroke-stage path,
+.worksheet-model path {
+  fill: none;
+  stroke: #163b43;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 180ms ease;
+}
+
+.stroke-stage path.drawing {
+  stroke: #e04f62;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-kana 850ms ease forwards;
+}
+
+.stroke-stage circle,
+.worksheet-model circle {
+  fill: #e04f62;
+  stroke: white;
+  stroke-width: 1;
+}
+
+.stroke-stage text,
+.worksheet-model text {
+  fill: white;
+  font-size: 7px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+@keyframes draw-kana {
+  to { stroke-dashoffset: 0; }
+}
+
+.dictation-mask {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  color: #173b43;
+}
+
+.dictation-mask b {
+  font-size: 23px;
+}
+
+.dictation-mask span {
+  color: #5c777d;
+}
+
+.paper-coach,
+.check-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.paper-coach h4,
+.check-card h4 {
+  margin: 10px 0 16px;
+  font-size: 20px;
+}
+
+.paper-timer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.paper-timer b {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--yellow);
+  font-size: 34px;
+}
+
+.paper-timer span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.paper-timer button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px;
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.reveal-answer {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.self-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.check-card label {
+  display: block;
+  margin-top: 9px;
+  color: #c8e1e5;
+}
+
+.check-card input {
+  width: 18px;
+  height: 18px;
+  margin-right: 7px;
+  accent-color: var(--cyan);
+  vertical-align: middle;
+}
+
+.check-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.confusing-note {
+  color: var(--yellow) !important;
+}
+
+.rating-row {
+  justify-content: flex-end;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(115, 239, 194, 0.055);
+}
+
+.rating-row > div {
+  margin-right: auto;
+}
+
+.rating-row b,
+.rating-row span {
+  display: block;
+}
+
+.rating-row span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.rating-row button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.rating-row button.selected {
+  color: #062c2d;
+  background: var(--mint);
+}
+
+.kana-credit {
+  margin: -8px 0 0;
+  color: #729aa3;
+  font-size: 10px;
+}
+
+.worksheet-page {
+  width: min(1100px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 36px 0 60px;
+}
+
+.worksheet-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.worksheet-toolbar h1 {
+  margin: 6px 0 0;
+}
+
+.worksheet-toolbar a,
+.print-hint {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 13px;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.worksheet-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 36px;
+  margin: 24px 0;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.worksheet-info p {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--muted);
+}
+
+.worksheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.worksheet-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+  border: 1px solid #7e9398;
+  border-radius: 12px;
+  background: white;
+}
+
+.worksheet-model,
+.worksheet-blank {
+  position: relative;
+  aspect-ratio: 1;
+  border-right: 1px solid #b5c0c2;
+  border-bottom: 1px solid #b5c0c2;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), #d6dcdd 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(transparent calc(50% - 0.5px), #d6dcdd 50%, transparent calc(50% + 0.5px));
+}
+
+.worksheet-model svg {
+  width: 100%;
+  height: 100%;
+}
+
+.worksheet-blank span {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  color: #a1adaf;
+  font-size: 9px;
+}
+
+.worksheet-card footer {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  color: #183a42;
+}
+
+.worksheet-card footer b {
+  font-size: 20px;
+}
+
+.worksheet-card footer label {
+  margin-left: auto;
+}
+
+.worksheet-footer {
+  margin-top: 22px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 10px;
+}
+
 @media (max-width: 1100px) {
   .topbar {
     padding-inline: 24px;
@@ -1615,7 +2004,8 @@ p {
   }
 
   .alert-section,
-  .briefing-grid {
+  .briefing-grid,
+  .kana-workspace {
     grid-template-columns: 1fr;
   }
 
@@ -1644,7 +2034,9 @@ p {
   }
 
   .assignment-grid,
-  .admin-grid {
+  .admin-grid,
+  .self-check-grid,
+  .worksheet-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1715,6 +2107,54 @@ p {
     border-color: #bbb;
     background: white;
   }
+
+  .worksheet-page {
+    width: 100%;
+    padding: 0;
+    color: #111;
+  }
+
+  .worksheet-toolbar nav,
+  .worksheet-info p {
+    display: none;
+  }
+
+  .worksheet-toolbar {
+    margin-bottom: 10px;
+  }
+
+  .worksheet-toolbar h1 {
+    font-size: 24px;
+  }
+
+  .worksheet-info {
+    margin: 8px 0 14px;
+    padding: 8px 0;
+    border: 0;
+  }
+
+  .worksheet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .worksheet-card {
+    break-inside: avoid;
+  }
+
+  .worksheet-model,
+  .worksheet-blank {
+    aspect-ratio: 1.15;
+  }
+
+  .worksheet-footer {
+    color: #444;
+  }
+}
+
+@page {
+  size: A4 portrait;
+  margin: 12mm;
 }
 
 @media (prefers-reduced-motion: reduce) {

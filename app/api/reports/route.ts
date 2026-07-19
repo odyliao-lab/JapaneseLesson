@@ -1,6 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { assignments, classes, classMembers, lessonAttempts, submissions } from "../../../db/schema";
+import { assignments, classes, classMembers, kanaMastery, lessonAttempts, submissions } from "../../../db/schema";
 import { getChatGPTUser } from "../../chatgpt-auth";
 
 export async function GET(request: Request) {
@@ -18,6 +18,9 @@ export async function GET(request: Request) {
     const attempts = emails.length
       ? await db.select().from(lessonAttempts).where(inArray(lessonAttempts.email, emails))
       : [];
+    const kanaRecords = emails.length
+      ? await db.select().from(kanaMastery).where(inArray(kanaMastery.email, emails))
+      : [];
     const classAssignments = await db.select().from(assignments).where(eq(assignments.classId, classId));
     const assignmentIds = classAssignments.map((item) => item.id);
     const submitted = assignmentIds.length
@@ -27,6 +30,8 @@ export async function GET(request: Request) {
       const records = attempts.filter((item) => item.email === member.studentEmail);
       const minutes = records.reduce((sum, item) => sum + item.minutes, 0);
       const average = records.length ? Math.round(records.reduce((sum, item) => sum + item.score, 0) / records.length) : 0;
+      const writing = kanaRecords.filter((item) => item.email === member.studentEmail);
+      const writingReview = writing.filter((item) => item.rating !== "smooth").map((item) => item.kana);
       return {
         email: member.studentEmail,
         name: member.displayName,
@@ -34,6 +39,8 @@ export async function GET(request: Request) {
         average,
         minutes,
         lastActive: records.sort((a, b) => b.completedAt.localeCompare(a.completedAt))[0]?.completedAt ?? null,
+        writingChecked: writing.length,
+        writingReview,
         support: average < 70 ? "建議安排複習" : records.length >= 44 ? "可挑戰 N4" : "持續進步",
       };
     });

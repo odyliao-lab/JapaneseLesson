@@ -4,7 +4,11 @@ import { FormEvent, useEffect, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
 
 type Props = { user: ChatGPTUser | null };
-type Child = { email: string; records: Array<{ day: number; score: number; minutes: number; completedAt: string }> };
+type Child = {
+  email: string;
+  records: Array<{ day: number; score: number; minutes: number; completedAt: string }>;
+  writing: Array<{ kana: string; rating: "smooth" | "review" | "retry"; updatedAt: string }>;
+};
 
 export default function FamilyCenter({ user }: Props) {
   const [code, setCode] = useState("");
@@ -71,7 +75,13 @@ export default function FamilyCenter({ user }: Props) {
                   <div className="stat-card"><b>{child.records.length}</b><span>完成天數</span></div>
                   <div className="stat-card"><b>{average}%</b><span>平均分數</span></div>
                   <div className="stat-card"><b>{minutes}</b><span>學習分鐘</span></div>
-                  <div className="stat-card"><b>{child.records.length >= 45 ? "N4" : "N5"}</b><span>目前階段</span></div>
+                  <div className="stat-card"><b>{child.writing?.length ?? 0}</b><span>已檢查假名</span></div>
+                </div>
+                <div className="review-card">
+                  <b>紙筆書寫複習</b>
+                  <p>{child.writing?.filter((item) => item.rating !== "smooth").length
+                    ? `待複習：${child.writing.filter((item) => item.rating !== "smooth").map((item) => item.kana).join("、")}`
+                    : "目前沒有標記需要重練的假名。"}</p>
                 </div>
               </article>
             );

@@ -1,6 +1,6 @@
 import { and, eq, or } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { familyInvites, guardianLinks, lessonAttempts, profiles } from "../../../db/schema";
+import { familyInvites, guardianLinks, kanaMastery, lessonAttempts, profiles } from "../../../db/schema";
 import { getChatGPTUser } from "../../chatgpt-auth";
 
 function createCode() {
@@ -22,7 +22,11 @@ export async function GET() {
         .select({ day: lessonAttempts.day, score: lessonAttempts.score, minutes: lessonAttempts.minutes, completedAt: lessonAttempts.completedAt })
         .from(lessonAttempts)
         .where(eq(lessonAttempts.email, link.studentEmail));
-      children.push({ email: link.studentEmail, records });
+      const writing = await db
+        .select({ kana: kanaMastery.kana, rating: kanaMastery.rating, updatedAt: kanaMastery.updatedAt })
+        .from(kanaMastery)
+        .where(eq(kanaMastery.email, link.studentEmail));
+      children.push({ email: link.studentEmail, records, writing });
     }
     return Response.json({ links, children });
   } catch {

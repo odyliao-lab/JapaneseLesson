@@ -58,3 +58,25 @@ test("contains classroom, family, assignments and durable reports", async () => 
   assert.match(submissions, /feedback/);
   assert.match(content, /adminEmails/);
 });
+
+test("contains the paper-first kana writing lab", async () => {
+  const [lab, learningApp, schema, api, worksheet, strokeData] = await Promise.all([
+    source("app/components/KanaWritingLab.tsx"),
+    source("app/components/LearningApp.tsx"),
+    source("db/schema.ts"),
+    source("app/api/kana/route.ts"),
+    source("app/worksheets/page.tsx"),
+    source("app/data/kana-strokes.ts"),
+  ]);
+
+  assert.match(lab, /紙筆練習/);
+  assert.match(lab, /隨機聽寫/);
+  assert.match(lab, /寫得順/);
+  assert.match(lab, /需要重練/);
+  assert.doesNotMatch(lab, /PointerEvent|Apple Pencil|canvas/);
+  assert.match(learningApp, /字形鑑識/);
+  assert.match(schema, /sqliteTable\(\s*"kana_mastery"/);
+  assert.match(api, /onConflictDoUpdate/);
+  assert.match(worksheet, /五十音紙筆練習單/);
+  assert.match(strokeData, /KanjiVG/);
+});
