@@ -80,3 +80,17 @@ test("contains the paper-first kana writing lab", async () => {
   assert.match(worksheet, /五十音紙筆練習單/);
   assert.match(strokeData, /KanjiVG/);
 });
+
+test("scaffolds beginner notes before asking for original sentences", async () => {
+  const [client, content] = await Promise.all([
+    source("app/components/LearningApp.tsx"),
+    source("app/data/lesson-content.ts"),
+  ]);
+
+  assert.match(client, /今天最不熟的是哪個假名/);
+  assert.match(client, /作答範例/);
+  assert.match(client, /不用造句，回答練習狀況即可/);
+  assert.match(content, /lesson\.day <= 8/);
+  assert.match(content, /lesson\.day <= 12/);
+  assert.match(content, /lesson\.day <= 15/);
+});

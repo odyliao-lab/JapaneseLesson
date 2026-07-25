@@ -124,6 +124,7 @@ export default function LearningApp({ user, overrides }: Props) {
   const lessonSteps = isKanaLesson ? kanaSteps : standardSteps;
   const isKanaStep = isKanaLesson && activeStep === 1;
   const contentStep = activeStep - (isKanaLesson && activeStep > 1 ? 1 : 0);
+  const noteGuide = activeLesson ? getNoteGuide(activeLesson) : null;
 
   function validDay(day: number) {
     return Number.isInteger(day) && day >= 1 && day <= 60;
@@ -188,8 +189,8 @@ export default function LearningApp({ user, overrides }: Props) {
       return;
     }
     if (studyNote.trim().length < 20) {
-      setLessonMessage("請留下至少 20 個字的自習／案件筆記。");
-      setActiveStep(4);
+      setLessonMessage(activeLesson.day <= 12 ? "請依照引導問題留下至少 20 個字的練習紀錄。" : "請留下至少 20 個字的自習／案件筆記。");
+      setActiveStep(isKanaLesson ? 5 : 4);
       return;
     }
     const correct = content.quizzes.filter((quiz) => answers[quiz.id] === quiz.answer).length;
@@ -502,8 +503,15 @@ export default function LearningApp({ user, overrides }: Props) {
                   <small>INDEPENDENT INVESTIGATION</small><h3>{isKanaLesson ? "10 分鐘紙筆默寫與自我檢查" : "15 分鐘獨立搜查"}</h3>
                   {isKanaLesson && <div className="status-note">紙筆任務：關閉答案提示後，由語音隨機聽寫；每字默寫 2 次，再把「還不熟／需要重練」的字各補寫 3 次。</div>}
                   <ol>{content.selfStudy.map((item) => <li key={item}>{item}</li>)}</ol>
-                  <label>案件筆記（至少 20 字）
-                    <textarea value={studyNote} onChange={(event) => setStudyNote(event.target.value)} rows={5} placeholder="記下不熟悉的線索、自己的例句，以及今天最容易出錯的地方……" />
+                  {noteGuide && (
+                    <div className={`note-guide ${noteGuide.kind}`}>
+                      <b>{noteGuide.title}</b>
+                      <ol>{noteGuide.questions.map((question) => <li key={question}>{question}</li>)}</ol>
+                      <p><strong>作答範例：</strong>{noteGuide.example}</p>
+                    </div>
+                  )}
+                  <label>{activeLesson.day <= 12 ? "今日練習紀錄" : "案件筆記"}（至少 20 字）
+                    <textarea value={studyNote} onChange={(event) => setStudyNote(event.target.value)} rows={5} placeholder={noteGuide?.placeholder ?? "記下不熟悉的線索、自己的例句，以及今天最容易出錯的地方……"} />
                   </label>
                   <label>本次實際學習時間
                     <input type="number" min="15" max="90" value={studyMinutes} onChange={(event) => setStudyMinutes(Number(event.target.value))} /> 分鐘
@@ -566,6 +574,46 @@ export default function LearningApp({ user, overrides }: Props) {
 function csvCell(value: unknown) {
   const text = String(value ?? "").replaceAll('"', '""');
   return `"${text}"`;
+}
+
+function getNoteGuide(lesson: Lesson) {
+  if (lesson.day === 1) {
+    return {
+      kind: "kana-note",
+      title: "把下面三個答案合成一小段話",
+      questions: ["今天最不熟的是哪個假名？", "它怎麼讀？", "書寫或聽辨時容易錯在哪裡？"],
+      example: "我最不熟的是「え」，讀音是 e。默寫時容易想不起第二筆的位置，還要再多練習。",
+      placeholder: "例如：我最不熟的是「え」，讀音是 e。默寫時容易想不起第二筆的位置，還要再多練習。",
+    };
+  }
+
+  if (lesson.day <= 12) {
+    return {
+      kind: "kana-note",
+      title: "不用造句，回答練習狀況即可",
+      questions: ["哪個假名最需要複習？", "它的讀音是什麼？", "下次練習要特別注意哪裡？"],
+      example: `我最需要複習的是「${[...lesson.clue][0] ?? "あ"}」。我會先聽讀音，再注意筆畫方向並默寫三次。`,
+      placeholder: "寫下最需要複習的假名、讀音，以及容易寫錯或聽錯的地方……",
+    };
+  }
+
+  if (lesson.day <= 15) {
+    return {
+      kind: "sentence-note",
+      title: "照著核心句替換，不必從零開始",
+      questions: ["先抄寫今天的核心句。", "替換姓名、人物或物品中的一項。", "寫下替換後的新句子與中文意思。"],
+      example: `核心句是「${lesson.clue}」。我替換一個詞後，再寫出自己的版本。`,
+      placeholder: "先抄核心句，再替換一個詞，最後寫下中文意思……",
+    };
+  }
+
+  return {
+    kind: "open-note",
+    title: "整理今天的案件線索",
+    questions: ["哪個詞或規則還不熟？", "自己的例句是什麼？", "今天最容易出錯的地方在哪裡？"],
+    example: `我用「${lesson.focus}」寫了一個新句子，並檢查助詞與句尾是否正確。`,
+    placeholder: "記下不熟悉的線索、自己的例句，以及今天最容易出錯的地方……",
+  };
 }
 
 function mergeOverride(base: ReturnType<typeof buildLessonContent>, payloadJson?: string) {

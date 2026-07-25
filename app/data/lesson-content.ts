@@ -216,13 +216,44 @@ export function buildLessonContent(lesson: Lesson) {
       ],
     },
     listeningScript: `${lesson.clue}。もう一度聞いてください。${lesson.clue}。`,
-    selfStudy: [
-      `將「${lesson.clue}」抄寫三次，標出不熟悉的假名或漢字。`,
-      `以慢速和正常速度各跟讀三次，最後不看文字說一次。`,
-      `使用今天的「${lesson.focus}」寫一個自己的例句。`,
-      `完成任務：「${lesson.mission}」，並留下至少 20 字搜查筆記。`,
-    ],
+    selfStudy: buildSelfStudy(lesson),
   };
+}
+
+function buildSelfStudy(lesson: Lesson) {
+  if (lesson.day <= 8) {
+    return [
+      `將「${lesson.clue}」各抄寫三次，圈出最不熟悉的一個假名。`,
+      "以慢速和正常速度各跟讀三次，最後不看文字說一次。",
+      "寫下最不熟假名的讀音，並用中文記錄書寫或聽辨時容易出錯的地方。",
+      `完成任務：「${lesson.mission}」，再依照下方三個問題留下至少 20 字練習紀錄。`,
+    ];
+  }
+
+  if (lesson.day <= 12) {
+    return [
+      `將「${lesson.clue}」各抄寫三次，圈出最需要重練的字。`,
+      "以慢速和正常速度各跟讀三次，最後完成一次不看文字的聽寫。",
+      "從今天的線索詞彙選一個，抄寫並標出其中新學到的假名。",
+      `完成任務：「${lesson.mission}」，再留下至少 20 字練習紀錄。`,
+    ];
+  }
+
+  if (lesson.day <= 15) {
+    return [
+      `將「${lesson.clue}」抄寫三次，標出不熟悉的假名或漢字。`,
+      "以慢速和正常速度各跟讀三次，最後不看文字說一次。",
+      "仿照今天的核心句，依照下方句型提示替換一個詞，不需要從零開始造句。",
+      `完成任務：「${lesson.mission}」，並留下至少 20 字搜查筆記。`,
+    ];
+  }
+
+  return [
+    `將「${lesson.clue}」抄寫三次，標出不熟悉的假名或漢字。`,
+    "以慢速和正常速度各跟讀三次，最後不看文字說一次。",
+    `使用今天的「${lesson.focus}」寫一個自己的例句。`,
+    `完成任務：「${lesson.mission}」，並留下至少 20 字搜查筆記。`,
+  ];
 }
 
 export const badgeCatalog = [
