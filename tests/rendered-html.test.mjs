@@ -94,21 +94,3 @@ test("scaffolds beginner notes before asking for original sentences", async () =
   assert.match(content, /lesson\.day <= 12/);
   assert.match(content, /lesson\.day <= 15/);
 });
-
-test("supports a complete local account and SQLite deployment path", async () => {
-  const [auth, localAuth, account, schema, config] = await Promise.all([
-    source("app/chatgpt-auth.ts"),
-    source("app/local-auth.ts"),
-    source("app/account/AccountForm.tsx"),
-    source("db/schema.ts"),
-    source("wrangler.local.jsonc"),
-  ]);
-  assert.match(auth, /getLocalUser/);
-  assert.match(localAuth, /PBKDF2/);
-  assert.match(localAuth, /210_000/);
-  assert.match(account, /建立本機學習帳號/);
-  assert.match(schema, /sqliteTable\("local_users"/);
-  assert.match(schema, /sqliteTable\("local_sessions"/);
-  assert.match(config, /LOCAL_DEPLOYMENT/);
-  assert.match(config, /japanese-lesson-local/);
-});

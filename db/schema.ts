@@ -124,18 +124,3 @@ export const kanaMastery = sqliteTable(
     index("kana_mastery_email_day_idx").on(table.email, table.day),
   ],
 );
-
-export const localUsers = sqliteTable("local_users", {
-  email: text("email").primaryKey(),
-  displayName: text("display_name").notNull(),
-  passwordHash: text("password_hash").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-});
-
-export const localSessions = sqliteTable("local_sessions", {
-  tokenHash: text("token_hash").primaryKey(),
-  email: text("email").notNull(),
-  expiresAt: text("expires_at").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-}, (table) => [index("local_sessions_email_idx").on(table.email)]);

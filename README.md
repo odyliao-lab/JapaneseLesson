@@ -32,22 +32,3 @@ npm test
 ```
 
 資料庫結構位於 `db/schema.ts`，Drizzle migration 位於 `drizzle/`。
-
-## 本機完整部署
-
-本機版沿用 Worker 執行環境，使用 Wrangler/Miniflare 的本機 D1 SQLite，並提供電子郵件與密碼登入。正式資料不會寫回 Sites D1。
-
-```powershell
-npm ci
-npm run local:build
-npm run local:start
-```
-
-預設服務位於 `http://127.0.0.1:3101`，資料存放於 `%USERPROFILE%\JapaneseLesson-Local\data`。可用以下指令檢查服務與備份資料庫：
-
-```powershell
-npm run local:health
-npm run local:backup
-```
-
-`scripts/install-local-tasks.ps1` 會建立登入時啟動的 `JapaneseLesson-Local`，以及每天 03:00 執行的 `JapaneseLesson-Backup`；備份保留最近 30 份。公開連線由 Cloudflare Tunnel 將 hostname 轉送至 `http://localhost:3101`。
