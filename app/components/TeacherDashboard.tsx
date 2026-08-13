@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
+import { appPath } from "../base-path";
 
 type Props = { user: ChatGPTUser | null };
 type ClassItem = { id: number; name: string; inviteCode: string };
@@ -30,7 +31,7 @@ export default function TeacherDashboard({ user }: Props) {
 
   useEffect(() => {
     if (!selectedClass) return;
-    void fetch(`/api/reports?classId=${selectedClass}`).then(async (response) => {
+    void fetch(appPath(`/api/reports?classId=${selectedClass}`)).then(async (response) => {
       if (!response.ok) return;
       const data = await response.json();
       setStudents(data.students ?? []);
@@ -39,7 +40,7 @@ export default function TeacherDashboard({ user }: Props) {
 
   async function loadDashboard() {
     const [classResponse, assignmentResponse, submissionResponse] = await Promise.all([
-      fetch("/api/classes"), fetch("/api/assignments"), fetch("/api/submissions"),
+      fetch(appPath("/api/classes")), fetch(appPath("/api/assignments")), fetch(appPath("/api/submissions")),
     ]);
     if (classResponse.ok) {
       const items = (await classResponse.json()).classes ?? [];
@@ -52,10 +53,10 @@ export default function TeacherDashboard({ user }: Props) {
 
   async function createClass(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/teacher");
+    if (!user) return window.location.assign(appPath("/signin-with-chatgpt?return_to=/teacher"));
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch("/api/classes", {
+    const response = await fetch(appPath("/api/classes"), {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: data.get("name") }),
     });
     const result = await response.json();
@@ -69,10 +70,10 @@ export default function TeacherDashboard({ user }: Props) {
 
   async function createAssignment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/teacher");
+    if (!user) return window.location.assign(appPath("/signin-with-chatgpt?return_to=/teacher"));
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch("/api/assignments", {
+    const response = await fetch(appPath("/api/assignments"), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -92,7 +93,7 @@ export default function TeacherDashboard({ user }: Props) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch("/api/submissions", {
+    const response = await fetch(appPath("/api/submissions"), {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ id: submission.id, score: Number(data.get("score")), feedback: data.get("feedback"), status: "reviewed" }),
@@ -106,7 +107,7 @@ export default function TeacherDashboard({ user }: Props) {
 
   async function manageMember(studentEmail: string, action: "remove" | "transfer", toClassId?: number) {
     if (!selectedClass) return;
-    const response = await fetch("/api/classes/members", {
+    const response = await fetch(appPath("/api/classes/members"), {
       method: action === "remove" ? "DELETE" : "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(
@@ -141,9 +142,9 @@ export default function TeacherDashboard({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CLASSROOM REPORT</small></span></a>
-        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/join">學生任務</a><a className="active" href="/teacher">班級報告</a>{user?.email === "ody.liao@gmail.com" && <a href="/admin">內容管理</a>}</nav>
-        <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/teacher">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/teacher">登入管理</a>}</div>
+        <a className="brand" href={appPath("/")}><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CLASSROOM REPORT</small></span></a>
+        <nav className="nav-pills"><a href={appPath("/")}>學習首頁</a><a href={appPath("/join")}>學生任務</a><a className="active" href={appPath("/teacher")}>班級報告</a>{user?.email === "ody.liao@gmail.com" && <a href={appPath("/admin")}>內容管理</a>}</nav>
+        <div className="header-actions">{user ? <a className="profile-pill" href={appPath("/signout-with-chatgpt?return_to=/teacher")}>登出</a> : <a className="profile-pill" href={appPath("/signin-with-chatgpt?return_to=/teacher")}>登入管理</a>}</div>
       </header>
 
       <main className="teacher-wrap">

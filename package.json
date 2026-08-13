@@ -12,7 +12,7 @@
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "local:build": "vinext build",
+    "local:build": "powershell -ExecutionPolicy Bypass -File scripts/local-build.ps1",
     "local:start": "powershell -ExecutionPolicy Bypass -File scripts/local-start.ps1",
     "local:backup": "powershell -ExecutionPolicy Bypass -File scripts/local-backup.ps1",
     "local:health": "powershell -ExecutionPolicy Bypass -File scripts/local-health.ps1"

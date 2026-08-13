@@ -1,4 +1,5 @@
 import { revokeLocalSession, isLocalDeployment, LOCAL_SESSION_COOKIE } from "../local-auth";
+import { APP_BASE_PATH, appPath } from "../base-path";
 
 export async function GET(request: Request) {
   if (!isLocalDeployment()) return new Response("Not found", { status: 404 });
@@ -8,8 +9,8 @@ export async function GET(request: Request) {
   return new Response(null, {
     status: 302,
     headers: {
-      location: new URL(returnTo, request.url).toString(),
-      "set-cookie": `${LOCAL_SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+      location: new URL(appPath(returnTo), request.url).toString(),
+      "set-cookie": `${LOCAL_SESSION_COOKIE}=; Path=${APP_BASE_PATH || "/"}; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
     },
   });
 }
