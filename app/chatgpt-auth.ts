@@ -1,5 +1,6 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getLocalUser, LOCAL_SESSION_COOKIE } from "./local-auth";
 
 export type ChatGPTUser = {
   displayName: string;
@@ -19,7 +20,10 @@ const CALLBACK_PATH = "/callback";
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
   const email = requestHeaders.get(USER_EMAIL_HEADER);
-  if (!email) return null;
+  if (!email) {
+    const cookieStore = await cookies();
+    return getLocalUser(cookieStore.get(LOCAL_SESSION_COOKIE)?.value);
+  }
 
   const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
   const fullName =
