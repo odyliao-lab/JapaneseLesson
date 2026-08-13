@@ -43,11 +43,11 @@ npm run local:build
 npm run local:start
 ```
 
-預設服務位於 `http://127.0.0.1:3101/japanese`，資料存放於 `%USERPROFILE%\JapaneseLesson-Local\data`。可用以下指令檢查服務與備份資料庫：
+預設服務位於 `http://127.0.0.1:3101`，資料存放於 `%USERPROFILE%\JapaneseLesson-Local\data`。可用以下指令檢查服務與備份資料庫：
 
 ```powershell
 npm run local:health
 npm run local:backup
 ```
 
-`scripts/install-local-tasks.ps1` 會建立登入時啟動的 `JapaneseLesson-Local`，以及每天 03:00 執行的 `JapaneseLesson-Backup`；備份保留最近 30 份。公開連線可由 Cloudflare Tunnel 將既有 hostname 的 `/japanese` 路徑轉送至 `http://localhost:3101`。
+`scripts/install-local-tasks.ps1` 會建立登入時啟動的 `JapaneseLesson-Local`，以及每天 03:00 執行的 `JapaneseLesson-Backup`；備份保留最近 30 份。公開連線由 Cloudflare Tunnel 將 hostname 轉送至 `http://localhost:3101`。

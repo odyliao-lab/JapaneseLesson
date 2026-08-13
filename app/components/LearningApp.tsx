@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
-import { appPath } from "../base-path";
 import { lessons, stages, type Lesson, type StageId } from "../data/curriculum";
 import { badgeCatalog, buildLessonContent, lessonLevel } from "../data/lesson-content";
 import KanaWritingLab from "./KanaWritingLab";
@@ -84,7 +83,7 @@ export default function LearningApp({ user, overrides }: Props) {
 
   useEffect(() => {
     if (!user || !ready) return;
-    void Promise.all([fetch(appPath("/api/progress")), fetch(appPath("/api/student"))])
+    void Promise.all([fetch("/api/progress"), fetch("/api/student")])
       .then(async ([progressResponse, studentResponse]) => {
         if (progressResponse.ok) {
           const data = (await progressResponse.json()) as { completedDays?: number[]; records?: Attempt[] };
@@ -210,7 +209,7 @@ export default function LearningApp({ user, overrides }: Props) {
 
     if (user) {
       try {
-        const response = await fetch(appPath("/api/progress"), {
+        const response = await fetch("/api/progress", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ ...attempt, answers }),
@@ -258,15 +257,15 @@ export default function LearningApp({ user, overrides }: Props) {
           <a href="#roadmap">案件地圖</a>
           <a href="#lessons">線索手冊</a>
           <a href="#profile">我的報告</a>
-          <a href={appPath("/join")}>加入班級</a>
-          <a href={appPath("/teacher")}>班級管理</a>
+          <a href="/join">加入班級</a>
+          <a href="/teacher">班級管理</a>
         </nav>
         <div className="header-actions">
           <span className="streak">⚡ {xp} XP</span>
           {user ? (
-            <a className="profile-pill" href={appPath("/signout-with-chatgpt?return_to=/")}><span>{user.displayName}</span>・登出</a>
+            <a className="profile-pill" href="/signout-with-chatgpt?return_to=/"><span>{user.displayName}</span>・登出</a>
           ) : (
-            <a className="profile-pill" href={appPath("/signin-with-chatgpt?return_to=/")}><span>同步進度</span>・登入</a>
+            <a className="profile-pill" href="/signin-with-chatgpt?return_to=/"><span>同步進度</span>・登入</a>
           )}
         </div>
       </header>
@@ -303,7 +302,7 @@ export default function LearningApp({ user, overrides }: Props) {
             <small className="muted">ORIGINAL CLUB MEMBERS</small>
             <h2>你的五人搜查小隊</h2>
             <p className="muted">原創角色會在不同學習環節提供提示。</p>
-            <Image className="crew-art" src={appPath("/crew-v1.png")} alt="五位原創日語學習搜查員" width={1693} height={929} priority unoptimized />
+            <Image className="crew-art" src="/crew-v1.png" alt="五位原創日語學習搜查員" width={1693} height={929} priority />
             <div className="crew-role-list">
               {crew.map(([name, role, badge, color]) => (
                 <span key={name} style={{ "--crew": color } as React.CSSProperties}><b>{badge}</b>{name}・{role}</span>
@@ -410,7 +409,7 @@ export default function LearningApp({ user, overrides }: Props) {
             })}
           </div>
           <p className="muted family-link">
-            需要家長查看進度？<a href={appPath("/family")}>前往家長連結中心 →</a>
+            需要家長查看進度？<a href="/family">前往家長連結中心 →</a>
           </p>
         </section>
       </main>

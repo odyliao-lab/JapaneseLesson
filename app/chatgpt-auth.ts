@@ -1,7 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocalUser, LOCAL_SESSION_COOKIE } from "./local-auth";
-import { appPath } from "./base-path";
 
 export type ChatGPTUser = {
   displayName: string;
@@ -51,12 +50,12 @@ export async function requireChatGPTUser(
 
 export function chatGPTSignInPath(returnTo: string): string {
   const safeReturnTo = safeRelativeReturnPath(returnTo);
-  return appPath(`${SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`);
+  return `${SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
 }
 
 export function chatGPTSignOutPath(returnTo = "/"): string {
   const safeReturnTo = safeRelativeReturnPath(returnTo);
-  return appPath(`${SIGN_OUT_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`);
+  return `${SIGN_OUT_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
 }
 
 function safeRelativeReturnPath(value: string): string {

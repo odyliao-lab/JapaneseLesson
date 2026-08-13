@@ -28,18 +28,8 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const basePath = process.env.NEXT_PUBLIC_APP_BASE_PATH ?? "";
 
-    if (basePath && url.pathname.startsWith(`${basePath}/`)) {
-      const assetPath = url.pathname.slice(basePath.length);
-      if (assetPath.startsWith("/assets/") || ["/crew-v1.png", "/favicon.svg", "/og.png"].includes(assetPath)) {
-        const assetUrl = new URL(request.url);
-        assetUrl.pathname = assetPath;
-        return env.ASSETS.fetch(new Request(assetUrl, request));
-      }
-    }
-
-    if (url.pathname === "/_vinext/image" || url.pathname.endsWith("/_vinext/image")) {
+    if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
         fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),

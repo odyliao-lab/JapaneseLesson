@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { confusingPairs, kanaByDay, kanaStrokes } from "../data/kana-strokes";
-import { appPath } from "../base-path";
 
 type Rating = "smooth" | "review" | "retry";
 type RatingMap = Record<string, Rating>;
@@ -56,7 +55,7 @@ export default function KanaWritingLab({
       }
     }, 0);
     if (signedIn) {
-      void fetch(appPath("/api/kana"))
+      void fetch("/api/kana")
         .then((response) => response.ok ? response.json() : null)
         .then((data: { records?: Array<{ kana: string; rating: Rating }> } | null) => {
           if (!data?.records) return;
@@ -133,7 +132,7 @@ export default function KanaWritingLab({
     setRatings(next);
     localStorage.setItem(localKey, JSON.stringify(next));
     if (signedIn) {
-      await fetch(appPath("/api/kana"), {
+      await fetch("/api/kana", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ kana: selected, day, rating }),

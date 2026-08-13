@@ -8,7 +8,7 @@
   "rules": [
     { "type": "ESModule", "globs": ["**/*.js", "**/*.mjs"] }
   ],
-  "assets": { "binding": "ASSETS", "directory": "dist/client" },
+  "assets": { "directory": "dist/client" },
   "vars": { "LOCAL_DEPLOYMENT": "true" },
   "d1_databases": [
     {

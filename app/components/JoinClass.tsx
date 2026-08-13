@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
-import { appPath } from "../base-path";
 
 type Props = { user: ChatGPTUser | null };
 type Assignment = {
@@ -21,7 +20,7 @@ export default function JoinClass({ user }: Props) {
 
   useEffect(() => {
     if (!user) return;
-    void fetch(appPath("/api/student")).then(async (response) => {
+    void fetch("/api/student").then(async (response) => {
       if (!response.ok) return;
       const data = await response.json();
       setAssignments(data.assignments ?? []);
@@ -32,12 +31,12 @@ export default function JoinClass({ user }: Props) {
   async function join(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!user) {
-      window.location.href = appPath("/signin-with-chatgpt?return_to=/join");
+      window.location.href = "/signin-with-chatgpt?return_to=/join";
       return;
     }
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch(appPath("/api/classes/join"), {
+    const response = await fetch("/api/classes/join", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ inviteCode: data.get("inviteCode") }),
@@ -54,7 +53,7 @@ export default function JoinClass({ user }: Props) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch(appPath("/api/submissions"), {
+    const response = await fetch("/api/submissions", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ assignmentId, content: data.get("content") }),
@@ -69,9 +68,9 @@ export default function JoinClass({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href={appPath("/")}><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>STUDENT MISSIONS</small></span></a>
-        <nav className="nav-pills"><a href={appPath("/")}>學習首頁</a><a className="active" href={appPath("/join")}>加入班級</a><a href={appPath("/family")}>家長連結</a></nav>
-        <div className="header-actions">{user ? <a className="profile-pill" href={appPath("/signout-with-chatgpt?return_to=/join")}>登出</a> : <a className="profile-pill" href={appPath("/signin-with-chatgpt?return_to=/join")}>登入</a>}</div>
+        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>STUDENT MISSIONS</small></span></a>
+        <nav className="nav-pills"><a href="/">學習首頁</a><a className="active" href="/join">加入班級</a><a href="/family">家長連結</a></nav>
+        <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/join">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/join">登入</a>}</div>
       </header>
       <main className="teacher-wrap narrow-wrap">
         <section className="panel teacher-hero">

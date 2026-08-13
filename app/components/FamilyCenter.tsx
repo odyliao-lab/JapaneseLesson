@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
-import { appPath } from "../base-path";
 
 type Props = { user: ChatGPTUser | null };
 type Child = {
@@ -18,15 +17,15 @@ export default function FamilyCenter({ user }: Props) {
 
   async function load() {
     if (!user) return;
-    const response = await fetch(appPath("/api/family"));
+    const response = await fetch("/api/family");
     if (response.ok) setChildren((await response.json()).children ?? []);
   }
 
   useEffect(() => { void load(); }, [user]);
 
   async function createInvite() {
-    if (!user) return window.location.assign(appPath("/signin-with-chatgpt?return_to=/family"));
-    const response = await fetch(appPath("/api/family"), {
+    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/family");
+    const response = await fetch("/api/family", {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "create" }),
     });
     const result = await response.json();
@@ -38,10 +37,10 @@ export default function FamilyCenter({ user }: Props) {
 
   async function redeem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!user) return window.location.assign(appPath("/signin-with-chatgpt?return_to=/family"));
+    if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/family");
     const form = event.currentTarget;
     const data = new FormData(form);
-    const response = await fetch(appPath("/api/family"), {
+    const response = await fetch("/api/family", {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "redeem", code: data.get("code") }),
     });
     const result = await response.json();
@@ -52,9 +51,9 @@ export default function FamilyCenter({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href={appPath("/")}><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>FAMILY REPORT</small></span></a>
-        <nav className="nav-pills"><a href={appPath("/")}>學習首頁</a><a href={appPath("/join")}>加入班級</a><a className="active" href={appPath("/family")}>家長連結</a></nav>
-        <div className="header-actions">{user ? <a className="profile-pill" href={appPath("/signout-with-chatgpt?return_to=/family")}>登出</a> : <a className="profile-pill" href={appPath("/signin-with-chatgpt?return_to=/family")}>登入</a>}</div>
+        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>FAMILY REPORT</small></span></a>
+        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/join">加入班級</a><a className="active" href="/family">家長連結</a></nav>
+        <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/family">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/family">登入</a>}</div>
       </header>
       <main className="teacher-wrap">
         <section className="panel teacher-hero">

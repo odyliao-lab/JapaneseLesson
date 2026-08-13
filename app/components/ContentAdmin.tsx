@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
-import { appPath } from "../base-path";
 import { lessons } from "../data/curriculum";
 
 type Props = { user: ChatGPTUser | null };
@@ -24,7 +23,7 @@ export default function ContentAdmin({ user }: Props) {
 
   useEffect(() => {
     if (!allowed) return;
-    void fetch(appPath("/api/content")).then(async (response) => {
+    void fetch("/api/content").then(async (response) => {
       if (response.ok) setOverrides((await response.json()).overrides ?? []);
     });
   }, [allowed]);
@@ -45,7 +44,7 @@ export default function ContentAdmin({ user }: Props) {
       setMessage("內容 JSON 格式錯誤，請先修正。");
       return;
     }
-    const response = await fetch(appPath("/api/content"), {
+    const response = await fetch("/api/content", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ day, title, content: parsed }),
@@ -56,15 +55,15 @@ export default function ContentAdmin({ user }: Props) {
   }
 
   if (!user) {
-    return <AccessPage message="請先登入管理者帳號。" action={appPath("/signin-with-chatgpt?return_to=/admin")} />;
+    return <AccessPage message="請先登入管理者帳號。" action="/signin-with-chatgpt?return_to=/admin" />;
   }
-  if (!allowed) return <AccessPage message="此帳號沒有課程管理權限。" action={appPath("/")} />;
+  if (!allowed) return <AccessPage message="此帳號沒有課程管理權限。" action="/" />;
 
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href={appPath("/")}><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CONTENT CONTROL</small></span></a>
-        <nav className="nav-pills"><a href={appPath("/")}>學習首頁</a><a href={appPath("/teacher")}>班級管理</a><a className="active" href={appPath("/admin")}>內容管理</a></nav>
+        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CONTENT CONTROL</small></span></a>
+        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/teacher">班級管理</a><a className="active" href="/admin">內容管理</a></nav>
       </header>
       <main className="teacher-wrap">
         <section className="panel dashboard-card">

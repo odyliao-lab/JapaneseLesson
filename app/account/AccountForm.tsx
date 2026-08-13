@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { appPath } from "../base-path";
 
 export default function AccountForm({ returnTo }: { returnTo: string }) {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -14,7 +13,7 @@ export default function AccountForm({ returnTo }: { returnTo: string }) {
     setBusy(true);
     setMessage("");
     const form = new FormData(event.currentTarget);
-    const response = await fetch(appPath("/api/local-auth"), {
+    const response = await fetch("/api/local-auth", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -26,7 +25,7 @@ export default function AccountForm({ returnTo }: { returnTo: string }) {
       }),
     });
     const result = await response.json() as { error?: string; returnTo?: string };
-    if (response.ok) window.location.assign(appPath(result.returnTo ?? "/"));
+    if (response.ok) window.location.assign(result.returnTo ?? "/");
     else setMessage(result.error ?? "操作失敗，請稍後再試。");
     setBusy(false);
   }
