@@ -94,3 +94,18 @@ test("scaffolds beginner notes before asking for original sentences", async () =
   assert.match(content, /lesson\.day <= 12/);
   assert.match(content, /lesson\.day <= 15/);
 });
+
+test("provides a tablet audio compatibility diagnostic", async () => {
+  const [page, diagnostic] = await Promise.all([
+    source("app/audio-test/page.tsx"),
+    source("app/components/AudioCompatibilityTest.tsx"),
+  ]);
+
+  assert.match(page, /平板語音鑑識室/);
+  assert.match(diagnostic, /Web Audio/);
+  assert.match(diagnostic, /HTML Audio/);
+  assert.match(diagnostic, /目前課程的播放方式/);
+  assert.match(diagnostic, /取消後延遲播放/);
+  assert.match(diagnostic, /指定日文 Voice/);
+  assert.match(diagnostic, /複製測試結果/);
+});
