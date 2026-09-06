@@ -96,9 +96,10 @@ test("scaffolds beginner notes before asking for original sentences", async () =
 });
 
 test("provides a tablet audio compatibility diagnostic", async () => {
-  const [page, diagnostic] = await Promise.all([
+  const [page, diagnostic, speech] = await Promise.all([
     source("app/audio-test/page.tsx"),
     source("app/components/AudioCompatibilityTest.tsx"),
+    source("app/lib/japanese-speech.ts"),
   ]);
 
   assert.match(page, /平板語音鑑識室/);
@@ -107,5 +108,17 @@ test("provides a tablet audio compatibility diagnostic", async () => {
   assert.match(diagnostic, /目前課程的播放方式/);
   assert.match(diagnostic, /取消後延遲播放/);
   assert.match(diagnostic, /指定日文 Voice/);
+  assert.match(diagnostic, /selectJapaneseVoice/);
+  assert.match(speech, /ja-jp/);
+  assert.match(speech, /localService/);
   assert.match(diagnostic, /複製測試結果/);
+});
+
+test("uses an explicit Japanese voice for every lesson playback", async () => {
+  const client = await source("app/components/LearningApp.tsx");
+
+  assert.match(client, /selectJapaneseVoice\(synth\.getVoices\(\)\)/);
+  assert.match(client, /utterance\.voice = voice/);
+  assert.doesNotMatch(client, /speechSynthesis\.cancel\(\);\s*const utterance/);
+  assert.match(client, /utterancesRef\.current\.add\(utterance\)/);
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { selectJapaneseVoice } from "../lib/japanese-speech";
 
 type Verdict = "yes" | "no" | "untested";
 type RunState = "ready" | "running" | "started" | "ended" | "error";
@@ -119,7 +120,7 @@ export default function AudioCompatibilityTest() {
     utterance.lang = "ja-JP";
     utterance.rate = 0.72;
     if (id === "voice") {
-      const selectedVoice = japaneseVoices.find((voice) => voice.lang.toLowerCase() === "ja-jp") ?? japaneseVoices[0];
+      const selectedVoice = selectJapaneseVoice(voices);
       if (!selectedVoice) throw new Error(`語音清單共有 ${voices.length} 個，但找不到日文 voice`);
       utterance.voice = selectedVoice;
     }

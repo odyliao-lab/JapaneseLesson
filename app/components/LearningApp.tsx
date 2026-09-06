@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatGPTUser } from "../chatgpt-auth";
 import { lessons, stages, type Lesson, type StageId } from "../data/curriculum";
 import { badgeCatalog, buildLessonContent, lessonLevel } from "../data/lesson-content";
+import { selectJapaneseVoice } from "../lib/japanese-speech";
 import KanaWritingLab from "./KanaWritingLab";
 
 type Props = {
@@ -57,6 +58,8 @@ export default function LearningApp({ user, overrides }: Props) {
   const [recordingUrl, setRecordingUrl] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const japaneseVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const utterancesRef = useRef<Set<SpeechSynthesisUtterance>>(new Set());
 
   useEffect(() => {
     try {
@@ -80,6 +83,25 @@ export default function LearningApp({ user, overrides }: Props) {
   useEffect(() => {
     if (ready) localStorage.setItem(romajiKey, String(romaji));
   }, [romaji, ready]);
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    const retainedUtterances = utterancesRef.current;
+    const loadJapaneseVoice = () => {
+      japaneseVoiceRef.current = selectJapaneseVoice(synth.getVoices());
+    };
+    loadJapaneseVoice();
+    synth.addEventListener("voiceschanged", loadJapaneseVoice);
+    const retryTimer = window.setTimeout(loadJapaneseVoice, 300);
+
+    return () => {
+      window.clearTimeout(retryTimer);
+      synth.removeEventListener("voiceschanged", loadJapaneseVoice);
+      synth.cancel();
+      retainedUtterances.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!user || !ready) return;
@@ -142,15 +164,31 @@ export default function LearningApp({ user, overrides }: Props) {
   }
 
   function speak(text: string, rate = 0.82) {
-    if (!("speechSynthesis" in window)) {
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
       setLessonMessage("此瀏覽器不支援語音播放。");
       return;
     }
-    window.speechSynthesis.cancel();
+    const synth = window.speechSynthesis;
+    const voice = selectJapaneseVoice(synth.getVoices()) ?? japaneseVoiceRef.current;
+    if (!voice) {
+      setLessonMessage("日文語音正在準備中，請稍候幾秒再按一次播放。");
+      return;
+    }
+    japaneseVoiceRef.current = voice;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ja-JP";
     utterance.rate = rate;
-    window.speechSynthesis.speak(utterance);
+    utterance.voice = voice;
+    const releaseUtterance = () => utterancesRef.current.delete(utterance);
+    utterance.onend = releaseUtterance;
+    utterance.onerror = (event) => {
+      releaseUtterance();
+      if (event.error !== "canceled" && event.error !== "interrupted") {
+        setLessonMessage("日文語音播放失敗，請重新整理頁面後再試一次。");
+      }
+    };
+    utterancesRef.current.add(utterance);
+    synth.speak(utterance);
   }
 
   async function startRecording() {
