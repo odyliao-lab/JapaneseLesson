@@ -208,7 +208,7 @@ describe("teacher-only and membership gates", () => {
     setSelectResults(
       [{ id: 11, assignmentId: 4, studentEmail: STUDENT_EMAIL }],
       [{ id: 4, classId: 1, title: "結案" }],
-      [{ id: 1, teacherEmail: TEACHER_EMAIL }],
+      [],
     );
     const { status, body } = await read(
       await submissions.PATCH(

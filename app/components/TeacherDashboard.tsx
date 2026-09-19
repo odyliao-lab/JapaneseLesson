@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import type { ChatGPTUser } from "../chatgpt-auth";
 
 type Props = { user: ChatGPTUser | null };
@@ -141,8 +142,8 @@ export default function TeacherDashboard({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CLASSROOM REPORT</small></span></a>
-        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/join">學生任務</a><a className="active" href="/teacher">班級報告</a>{user?.email === "ody.liao@gmail.com" && <a href="/admin">內容管理</a>}</nav>
+        <Link className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CLASSROOM REPORT</small></span></Link>
+        <nav className="nav-pills"><Link href="/">學習首頁</Link><a href="/join">學生任務</a><a className="active" href="/teacher">班級報告</a>{user?.email === "ody.liao@gmail.com" && <a href="/admin">內容管理</a>}</nav>
         <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/teacher">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/teacher">登入管理</a>}</div>
       </header>
 

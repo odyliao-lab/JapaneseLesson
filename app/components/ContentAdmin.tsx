@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import type { ChatGPTUser } from "../chatgpt-auth";
 import { lessons } from "../data/curriculum";
 
@@ -62,8 +63,8 @@ export default function ContentAdmin({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CONTENT CONTROL</small></span></a>
-        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/teacher">班級管理</a><a className="active" href="/admin">內容管理</a></nav>
+        <Link className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>CONTENT CONTROL</small></span></Link>
+        <nav className="nav-pills"><Link href="/">學習首頁</Link><a href="/teacher">班級管理</a><a className="active" href="/admin">內容管理</a></nav>
       </header>
       <main className="teacher-wrap">
         <section className="panel dashboard-card">

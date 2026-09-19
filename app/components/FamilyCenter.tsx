@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import type { ChatGPTUser } from "../chatgpt-auth";
 
 type Props = { user: ChatGPTUser | null };
@@ -21,7 +22,13 @@ export default function FamilyCenter({ user }: Props) {
     if (response.ok) setChildren((await response.json()).children ?? []);
   }
 
-  useEffect(() => { void load(); }, [user]);
+  useEffect(() => {
+    if (!user) return;
+    void fetch("/api/family").then(async (response) => {
+      if (!response.ok) return;
+      setChildren((await response.json()).children ?? []);
+    });
+  }, [user]);
 
   async function createInvite() {
     if (!user) return window.location.assign("/signin-with-chatgpt?return_to=/family");
@@ -51,8 +58,8 @@ export default function FamilyCenter({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>FAMILY REPORT</small></span></a>
-        <nav className="nav-pills"><a href="/">學習首頁</a><a href="/join">加入班級</a><a className="active" href="/family">家長連結</a></nav>
+        <Link className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>FAMILY REPORT</small></span></Link>
+        <nav className="nav-pills"><Link href="/">學習首頁</Link><a href="/join">加入班級</a><a className="active" href="/family">家長連結</a></nav>
         <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/family">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/family">登入</a>}</div>
       </header>
       <main className="teacher-wrap">
