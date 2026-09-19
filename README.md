@@ -27,8 +27,13 @@
 ```bash
 npm install
 npm run dev
-npm run build
+npm run lint
 npm test
+npm run build
 ```
+
+- `npm test` 跑 `node --test` 單元測試：現有的原始碼斷言，以及 API 授權測試（mock `next/headers` 與 D1，不連真實 Cloudflare）。
+- GitHub Actions（push / PR）會跑 `npm run lint` 與 `npm test`。CI **不**跑 `vinext build`，也沒有真實 D1。
+- 平板 TTS、ChatGPT Sites 真實登入標頭、以及 D1 上的完整班級流程仍需手動驗證。
 
 資料庫結構位於 `db/schema.ts`，Drizzle migration 位於 `drizzle/`。
