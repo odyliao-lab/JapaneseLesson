@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import type { ChatGPTUser } from "../chatgpt-auth";
 
 type Props = { user: ChatGPTUser | null };
@@ -68,8 +69,8 @@ export default function JoinClass({ user }: Props) {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>STUDENT MISSIONS</small></span></a>
-        <nav className="nav-pills"><a href="/">學習首頁</a><a className="active" href="/join">加入班級</a><a href="/family">家長連結</a></nav>
+        <Link className="brand" href="/"><span className="brand-mark">探</span><span><strong>日語推理研究所</strong><small>STUDENT MISSIONS</small></span></Link>
+        <nav className="nav-pills"><Link href="/">學習首頁</Link><a className="active" href="/join">加入班級</a><a href="/family">家長連結</a></nav>
         <div className="header-actions">{user ? <a className="profile-pill" href="/signout-with-chatgpt?return_to=/join">登出</a> : <a className="profile-pill" href="/signin-with-chatgpt?return_to=/join">登入</a>}</div>
       </header>
       <main className="teacher-wrap narrow-wrap">
